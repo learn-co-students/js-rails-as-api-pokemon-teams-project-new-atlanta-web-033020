@@ -1,23 +1,21 @@
 const BASE_URL = "http://localhost:3000"
 const TRAINERS_URL = `${BASE_URL}/trainers`
-const POKEMONS_URL = `${BASE_URL}/pokemons`
-
-   
+const POKEMONS_URL = `${BASE_URL}/pokemons/`
 
 // add event listener for DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function(e) {
     // put functions in here to create cards and add trainers
-    getTrainerInfo()
+    init()
 })
 
+function init(){
+    getTrainerInfo()
+}
 // fetch trainer info
 function getTrainerInfo(){
     fetch('http://localhost:3000/trainers')
     .then(res => res.json())
-    .then(res => {
-        console.log(res)
-        createCard(res)
-    })
+    .then(trainers => renderCard(trainers))
 }
 
  // < div class="card" data - id="1" > <p>Prince</p>
@@ -31,9 +29,9 @@ function getTrainerInfo(){
     //     </ul>
     //   </div>
 
-function createCard(res){
+function renderCard(trainers){
     let parent = document.querySelector('main')
-    res.forEach(trainer => {
+    trainers.forEach(trainer => {
         let card = document.createElement('div')
         let teamList = document.createElement('ul')
         card.className = 'card'
@@ -44,22 +42,35 @@ function createCard(res){
         card.appendChild(pTag)
         card.appendChild(teamList)
         trainer.pokemons.forEach(pokemon => {
-            createPokemon(pokemon, teamList)    
+            renderPokemon(pokemon, teamList)    
         })
-})
+    })
 }
 
-function createPokemon(pokemon, teamList){
-    let li = document.createElement('li')
-    let btn = document.createElement('btn')
+function renderPokemon(pokemon, teamList){
     let parent = document.querySelector('main')
+    let li = document.createElement('li')
     li.innerText = `${pokemon.nickname} (${pokemon.species})`
+    let btn = document.createElement('button')
     btn.className = 'release'
     btn.innerText = 'Release'
-    btn.innerHTML = 'Release'
-    btn.data.id = pokemon.id
-    // debugger;
-    // btn.data.pokemon.id = pokemonData.id
+    btn.addEventListener('click', () => {
+        releasePoke(pokemon, parent)
+    })
     teamList.appendChild(li)
     li.appendChild(btn)
+}
+
+function releasePoke(pokemon, parent){
+    console.log(pokemon)
+    fetch(POKEMONS_URL + pokemon.id, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(pokemon => {
+        if(pokemon.errors)
+            pokemon.errors.forEach(error => alert(error))
+        else
+        parent.remove
+    })
 }
